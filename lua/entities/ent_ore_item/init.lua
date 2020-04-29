@@ -2,9 +2,9 @@ AddCSLuaFile( "cl_init.lua")
 AddCSLuaFile( "shared.lua" )
 include( "shared.lua" )
 
-print("[phatMiner] Items")
+print( "[phatMiner] Items" )
 
-local HitSound = Sound("physics/glass/glass_bottle_impact_hard1.wav")
+local HitSound = Sound( "physics/glass/glass_bottle_impact_hard1.wav" )
 
 
 function ENT:Initialize()
@@ -35,14 +35,20 @@ end
 
 function ENT:Use( activator, caller )
 	if IsValid( activator ) then
-		if (self._ore_name) then
-			activator._phatItems[ self._ore_name ] = activator._phatItems[ self._ore_name ] + 1
+		if ( self._oreID ) then
+			activator._phatItems[ self._oreID ] = activator._phatItems[ self._oreID ] + 1
 		end
-	end
-	self:Remove()
 
-	local experience = activator:GetNWInt("miner_exp")
-	activator:SetNWInt("miner_exp", experience + 1)
+		local tbl = {
+			[ self._oreID ] = activator:GetOre( self._oreID )
+		}
+
+		net.Start( "phatminer_stats" )
+		net.WriteTable( tbl )
+		net.Send( activator )
+
+		self:Remove()
+	end
 end
 
 function ENT:OnTakeDamage( dmginfo )
@@ -52,4 +58,8 @@ function ENT:OnTakeDamage( dmginfo )
 	if self:Health() < 1 then
 		self:Remove()
 	end
+end
+
+function ENT:PhysicsCollide( data, phys )
+
 end

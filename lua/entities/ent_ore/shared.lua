@@ -15,7 +15,7 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(255, 10, 191, 200),
 		["mat"] = "models/shiny",
 		["value"] = 1600,
-		["chance"] = 10,
+		["chance"] = 1,
 	},
 	["stone"] = {
 		["name"] = "Stone",
@@ -23,7 +23,7 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(182, 182, 182),
 		["mat"] = "models/shiny",
 		["value"] = 10,
-		["chance"] = 10,
+		["chance"] = 45,
 	},
 	["gold"] = {
 		["name"] = "Gold",
@@ -31,7 +31,7 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(255, 255, 0),
 		["mat"] = "models/shiny",
 		["value"] = 1300,
-		["chance"] = 1,
+		["chance"] = 2,
 	},
 	["phat_stone"] = {
 		["name"] = "Phat Stone",
@@ -56,7 +56,7 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(127, 255, 255),
 		["mat"] = "models/shiny",
 		["value"] = 10000,
-		["chance"] = 2,
+		["chance"] = 1,
 	},
 
 	["sulfur"] = {
@@ -65,7 +65,7 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(235, 255, 0),
 		["mat"] = "models/shiny",
 		["value"] = 50,
-		["chance"] = 15,
+		["chance"] = 5,
 	},
 	["copper_ore"] = {
 		["name"] = "Copper",
@@ -73,7 +73,7 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(180, 168, 0),
 		["mat"] = "models/shiny",
 		["value"] = 35,
-		["chance"] = 30,
+		["chance"] = 4,
 	},
 	["salt"] = {
 		["name"] = "Salt",
@@ -81,7 +81,7 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(255, 255, 255),
 		["mat"] = "models/debug/debugwhite",
 		["value"] = 5,
-		["chance"] = 25,
+		["chance"] = 20,
 	},
 	["dirt"] = {
 		["name"] = "Dirt",
@@ -89,6 +89,6 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(127, 111, 63),
 		["mat"] = "models/debug/debugwhite",
 		["value"] = 1,
-		["chance"] = 50,
+		["chance"] = 30,
 	},
 }

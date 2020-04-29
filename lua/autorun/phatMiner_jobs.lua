@@ -1,5 +1,5 @@
 
---Proper to add to darkrpmodification/jobs.lua?
+--add to darkrpmodification/jobs.lua
 --[[TEAM_MINER = DarkRP.createJob( "Miner", {
 	color = Color(252, 255, 0, 255),
 	model = {"models/player/Group03/Female_01.mdl"},
@@ -14,4 +14,3 @@
 	candemote = true,
 	category = "Citizens"
 }) ]]
-

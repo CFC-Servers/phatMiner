@@ -3,12 +3,6 @@ AddCSLuaFile( "shared.lua" )
 include( "shared.lua" )
 
 
-local rock_models = {
-	[1] = "models/props_wasteland/rockcliff01f.mdl",
-	[2] = "models/props_wasteland/rockcliff01j.mdl",
-	[3] = "models/props_wasteland/rockcliff01k.mdl",
-}
-
 local rock_locations = {
 	["gm_construct"] = {
 		[1] = Vector(0, 0, -100),
@@ -20,37 +14,60 @@ local rock_locations = {
 }
 
 local npc_locations = {
-	[1] = Vector(250, 0, -100),
+	["gm_construct"] = {
+		[1] = Vector(0, 0, 100),
+		[2] = Vector(0, 250, 100),
+		[3] = Vector(0, 500, 100),
+		[4] = Vector(0, 750, 100),
+		[5] = Vector(0, 1000, 100),
+	}
 }
 
+
+local rock_models = {
+	[1] = "models/props_wasteland/rockcliff01f.mdl",
+	[2] = "models/props_wasteland/rockcliff01j.mdl",
+	[3] = "models/props_wasteland/rockcliff01k.mdl",
+}
 
 local HitSound = Sound("physics/glass/glass_bottle_impact_hard1.wav")
 
 hook.Add( "InitPostEntity", "OreCreate", function()
 
 	timer.Simple( 5, function()
-
 		local map = game.GetMap()
 
 		if ( rock_locations[ map ] ) then
 			for _, rock in pairs( rock_locations[ map ] ) do
-
 				print( string.format( "[phatMiner] Creating Rock @ %s.", rock ) )
 
 				local new_rock = ents.Create( "ent_ore" )
 				new_rock:SetPos( rock )
 				new_rock:SetAngles( Angle(0,0,0) )
 				new_rock:Spawn()
-
 			end
 		else
-			print( string.format( "[phatMiner] No rock locations set for %s", map ) )
+			print( string.format( "[phatMiner] No rock locations set for %s. (Check phatMiner/lua/entities/ent_ore/init.lua)", map ) )
+		end
+
+
+		if ( npc_locations[ map ] ) then
+			for _, npc in pairs( npc_locations[ map ] ) do
+				print( string.format( "[phatMiner] Creating NPC @ %s.", npc ) )
+
+				local new_npc = ents.Create( "ent_ore_npc" )
+				new_npc:SetPos( npc )
+				new_npc:SetAngles( Angle( 0, 0, 0 ) )
+				new_npc:Spawn()
+				new_npc:SetHealth( 5000 )
+			end
+		else
+			print( string.format( "[phatMiner] No npc locations set for %s. (Check phatMiner/lua/entities/ent_ore/init.lua)", map ) )
 		end
 
 	end )
 
 end )
-
 
 
 function ENT:Initialize()
@@ -70,6 +87,7 @@ function ENT:Initialize()
 
 end
 
+
 function ENT:SpawnFunction( ply, tr, ClassName )
 	if ( !tr.Hit ) then return end
 
@@ -83,8 +101,10 @@ function ENT:SpawnFunction( ply, tr, ClassName )
 	return ent
 end
 
+
 function ENT:Use( activator, caller )
 end
+
 
 function ENT:OnTakeDamage( dmginfo )
 	local activator = dmginfo:GetAttacker()
@@ -95,6 +115,9 @@ function ENT:OnTakeDamage( dmginfo )
 			return
 		end
 
+		local rng = math.random(10)
+		if (rng < 3) then return end --Check mining skill level here
+
 		local dmg = dmginfo:GetDamage()
 		self:SetHealth( self:Health() - dmg )
 
@@ -104,8 +127,6 @@ function ENT:OnTakeDamage( dmginfo )
 		col.b = math.Clamp( col.b - dmg, 0, 255 )
 		self:SetColor( col )
 
-		local rng = math.random(10)
-		if (rng < 3) then return end
 
 		self:EmitSound( HitSound )
 
@@ -117,13 +138,18 @@ function ENT:OnTakeDamage( dmginfo )
 		dropped_Ore:SetModelScale(1, 0.5)
 		dropped_Ore:PhysWake()
 
+
 		local ore, ore_key = table.Random( PHATMINER_ORE_TYPES )
 
+		while (math.random(0, 100) > ore.chance) do
+			ore, ore_key = table.Random( PHATMINER_ORE_TYPES )
+		end
+
+
+		dropped_Ore._oreID = ore_key
 		dropped_Ore:SetModel( ore.model )
 		dropped_Ore:SetColor( ore.color )
 		dropped_Ore:SetMaterial( ore.mat )
-
-		dropped_Ore._ore_name = ore_key
 	end
 
 
@@ -138,7 +164,7 @@ function ENT:OnTakeDamage( dmginfo )
 
 
 	if self.OutofOre then return end
-	if self:Health() < 15 then
+	if ( self:Health() < 15 ) then
 		self.OutofOre = true
 
 		local explode = ents.Create( "env_explosion" )
@@ -146,6 +172,7 @@ function ENT:OnTakeDamage( dmginfo )
 		explode:SetKeyValue( "iMagnitude", "80" )
 		explode:Fire( "Explode", 0, 0 )
 		explode:Remove()
+
 		timer.Simple( 2, function()
 			local new_rock = ents.Create( "ent_ore" )
 			new_rock:SetModel( old_model )

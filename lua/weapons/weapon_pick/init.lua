@@ -9,13 +9,21 @@ local pmeta = FindMetaTable( "Player" )
 
 function pmeta:GetOre( tOre )
 	if ( self._phatItems[ tOre ] ) then
-		return self._phatItems[ tOre ]
+		return tonumber( self._phatItems[ tOre ] )
 	else
-		print( string.format( "[phatMiner] We tried to retrieve data before it existed on Player: %s, Type: %s.", self:Nick(), tOre ) )
+		print( string.format( "[phatMiner] We tried to retrieve data before it existed on Player: %s, Type: %s.", self:AccountID(), tOre ) )
 	end
 end
 
-timer.Create( "phatMiner-UpdateStats", 1, 0, function()
+function pmeta:SetOre( tOre, amt )
+		if ( self._phatItems[ tOre ] ) then
+			self._phatItems[ tOre ] = amt
+		else
+			print( string.format( "[phatMiner] We tried to set data before it existed on Player: %s, Type: %s.", self:AccountID(), tOre ) )
+		end
+end
+
+timer.Create( "phatMiner-UpdateStats", 30, 0, function()
 	for _, ply in pairs( player.GetAll() ) do
 
 		if ( ply._phatItems ) then

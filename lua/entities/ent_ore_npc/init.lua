@@ -4,6 +4,60 @@ include( "shared.lua" )
 
 print("[phatMiner] Ore Trader (NPC)")
 
+util.AddNetworkString( "pm_oreexchange" )
+util.AddNetworkString( "pm_openmenu" )
+
+
+net.Receive( "pm_oreexchange", function(len, ply)
+	local oreTable = net.ReadTable()
+
+
+	local entsNear = ents.FindInSphere( ply:GetPos(), 240 )
+	local foundTrader = false
+
+	for _, ent in pairs( entsNear ) do
+		if (ent:GetClass() == "ent_ore_npc") then
+			foundTrader = true
+		end
+	end
+
+	if ( foundTrader ) then
+		local salePrice = 0
+		local saleCount = 0
+
+		for oreType, amt in pairs( oreTable ) do
+			if ( PHATMINER_ORE_TYPES[ oreType ] ) then
+
+				amt = math.abs( amt )
+
+				if ( ply:GetOre( oreType ) >= amt ) then
+					saleCount = saleCount + amt
+
+					--take ore
+					ply:SetOre( oreType, ply:GetOre( oreType ) - amt )
+
+					--add money
+					local balance = PHATMINER_ORE_TYPES[ oreType ].value * amt
+					ply:addMoney( balance )
+
+					salePrice = salePrice + balance
+
+					ply:ChatPrint( string.format( "Sold %i %s(s) for $%i.", amt, oreType, balance ) )
+				else
+					ply:ChatPrint( string.format( "You don't have enough %s to complete this offer.", oreType ) )
+				end
+			end
+		end
+
+		ply:ChatPrint( string.format( "Sale complete, sold %i items for a total of $%i.", saleCount, salePrice ) )
+	else
+
+		ply:ChatPrint( "Sorry theres no ore trader nearby." )
+	end
+
+end )
+
+
 local sayings = {
 	Sound("vo/npc/vortigaunt/dedicate.wav"),
 	Sound("vo/npc/vortigaunt/energyempower.wav"),
@@ -45,11 +99,12 @@ end
 
 function ENT:Use( activator, caller )
 	if IsValid( activator ) then
-		if (CurTime() > self.LastSaid + 3) then
+		if ( CurTime() > self.LastSaid + 2 ) then
 			self.LastSaid = CurTime()
 
 			--Open ore menu
-			activator:ChatPrint( "I'm currently not programmed to do anything else right now... damn." )
+			net.Start( "pm_openmenu" )
+			net.Send( activator )
 		else
 			--Asking to trade too fast
 		end

@@ -36,7 +36,7 @@ local menu_ores = false
 local menu_next = CurTime()
 local menu_material = Material( "vgui/gradient-r" )
 
-local function openMinerMenu()
+function openMinerMenu( bShowSellButtons )
 	if (CurTime() > menu_next) then
 		menu_next = CurTime() + 0.5
 
@@ -83,21 +83,50 @@ local function openMinerMenu()
 			for k, vOre in pairs( PHATMINER_ORE_TYPES ) do
 				local ore_button = vgui.Create( "DButton", menu_ores )
 				ore_button:SetFont( "phatlabel" )
-				ore_button:SetText( vOre.name )
+				ore_button:SetText( "" )
 				ore_button:SetSize( 100, 100 )
 				ore_button:Dock( TOP )
 				ore_button:SetTextColor( vOre.color )
 				ore_button.Paint = function( self )
 					local wide, tall = self:GetWide(), self:GetTall()
-					surface.SetDrawColor(0, 0, 0, 255)
-					surface.DrawOutlinedRect(0, 0, wide, tall)
+					surface.SetDrawColor( 0, 0, 0, 255 )
+					surface.DrawOutlinedRect( 0, 0, wide, tall )
 
-					draw.SimpleTextOutlined( vOre.amount or "Loading...", "phatlabel", 64, 64, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 0, Color(0,0,0) )
+					draw.SimpleTextOutlined( vOre.name or "Loading...", "phatlabel", 73, 34, vOre.color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER	, 2, Color(0,0,0) )
+
+
+					draw.SimpleTextOutlined( vOre.amount or "Loading...", "phatlabel", 70, 55, Color(255,255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, Color(0,0,0) )
+
+					if ( bShowSellButtons ) then
+						draw.SimpleTextOutlined( "Value: " .. ( vOre.amount * vOre.value ) or "Loading...", "phatlabel", 70, 75, Color(0,255,0,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, Color(0,0,0) )
+					end
+
+				end
+
+				if ( bShowSellButtons ) then
+
+					local sButton = vgui.Create( "DButton", ore_button )
+					sButton:Dock( TOP )
+					sButton:SetFont( "DermaDefaultBold" )
+					sButton:SetTextColor( Color(0,255,0) )
+					sButton:SetText( string.format( "Sell 1x %s", vOre.name) )
+					sButton.DoClick = function( self )
+						net.Start("pm_oreexchange")
+						net.WriteTable({
+							[ k ] = 1,
+						})
+						net.SendToServer()
+					end
 
 				end
 
 				ore_scroller:Add( ore_button )
 			end
+
+			if ( bShowSellButtons ) then
+				menu_ores:MakePopup()
+			end
+
 		else
 			menu_ores:Remove()
 			menu_ores = nil
