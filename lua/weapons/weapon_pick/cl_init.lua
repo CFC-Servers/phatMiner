@@ -20,10 +20,14 @@ surface.CreateFont( "phatlabel", {
 
 
 net.Receive( "phatminer_stats", function(len)
-	local stat_name = net.ReadString()
-	local amount = net.ReadInt(23)
-	if (PHATMINER_ORE_TYPES) then 
-		PHATMINER_ORE_TYPES[ stat_name ].amt = amount
+	local stat_table = net.ReadTable()
+
+	if (PHATMINER_ORE_TYPES) then
+		for k, v in pairs( stat_table ) do
+			if (PHATMINER_ORE_TYPES[ k ]) then
+				PHATMINER_ORE_TYPES[ k ].amount = v
+			end
+		end
 	end
 end )
 
@@ -32,26 +36,20 @@ local menu_ores = false
 local menu_next = CurTime()
 local menu_material = Material( "vgui/gradient-r" )
 
-function SWEP:Reload()
-
-
+local function openMinerMenu()
 	if (CurTime() > menu_next) then
 		menu_next = CurTime() + 0.5
 
-		if (not menu_ores) then 
+		if (not menu_ores) then
 			local wide, tall = ScrW(), ScrH()
-			
+
 			menu_ores = vgui.Create( "DFrame" )
 			menu_ores:SetTitle("")
 			menu_ores:SetSize( 150, 600 )
 			menu_ores:Dock( RIGHT )
 			menu_ores:DockMargin( 0, 0, 0, 0 )
 			menu_ores:Center()
-			
-			menu_ores.OnRemove = function()
-				PHATMINER_HOVERED = false
-			end
-			
+
 			menu_ores.Paint = function( self )
 				local wide, tall = self:GetWide(), self:GetTall()
 				surface.SetDrawColor( 25, 25, 25, 255 )
@@ -60,13 +58,14 @@ function SWEP:Reload()
 				surface.SetDrawColor( 25, 25, 25, 100 )
 				surface.DrawRect( 0, 0, wide, tall )
 			end
-			
-			
+
+
 			local ore_scroller = vgui.Create( "DScrollPanel", menu_ores )
 			ore_scroller:Dock( FILL )
-			
+
 			local sbar = ore_scroller:GetVBar()
 			sbar:SetWidth(10)
+
 			function sbar:Paint(w, h)
 				draw.RoundedBox(0, 0, 0, w, h, Color(0, 0, 0, 0))
 			end
@@ -79,8 +78,8 @@ function SWEP:Reload()
 			function sbar.btnGrip:Paint(w, h)
 				draw.RoundedBox(0, 0, 0, w, h, Color(255, 255, 255, 255))
 			end
-			
-			
+
+
 			for k, vOre in pairs( PHATMINER_ORE_TYPES ) do
 				local ore_button = vgui.Create( "DButton", menu_ores )
 				ore_button:SetFont( "phatlabel" )
@@ -93,22 +92,23 @@ function SWEP:Reload()
 					surface.SetDrawColor(0, 0, 0, 255)
 					surface.DrawOutlinedRect(0, 0, wide, tall)
 
-					
-					draw.SimpleTextOutlined( vOre.amt or "0", "phatlabel", 64, 64, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 0, Color(0,0,0) )		
-					
-					if ( self:IsHovered() ) then 
-						PHATMINER_HOVERED = self
-					end
-				
+					draw.SimpleTextOutlined( vOre.amount or "Loading...", "phatlabel", 64, 64, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 0, Color(0,0,0) )
+
 				end
-				
-				
-				
+
 				ore_scroller:Add( ore_button )
 			end
-		else 
+		else
 			menu_ores:Remove()
 			menu_ores = nil
-		end 
+		end
 	end
-end 
+end
+
+function SWEP:SecondaryAttack()
+	openMinerMenu()
+end
+
+function SWEP:Reload()
+	openMinerMenu()
+end
