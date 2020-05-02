@@ -2,7 +2,61 @@ AddCSLuaFile( "cl_init.lua")
 AddCSLuaFile( "shared.lua" )
 include( "shared.lua" )
 
-print("[T] Xen Trader (NPC)")
+print("[phatMiner] Ore Trader (NPC)")
+
+util.AddNetworkString( "pm_oreexchange" )
+util.AddNetworkString( "pm_openmenu" )
+
+
+net.Receive( "pm_oreexchange", function(len, ply)
+	local oreTable = net.ReadTable()
+
+
+	local entsNear = ents.FindInSphere( ply:GetPos(), 240 )
+	local foundTrader = false
+
+	for _, ent in pairs( entsNear ) do
+		if (ent:GetClass() == "ent_ore_npc") then
+			foundTrader = true
+		end
+	end
+
+	if ( foundTrader ) then
+		local salePrice = 0
+		local saleCount = 0
+
+		for oreType, amt in pairs( oreTable ) do
+			if ( PHATMINER_ORE_TYPES[ oreType ] ) then
+
+				amt = math.abs( amt )
+
+				if ( ply:GetOre( oreType ) >= amt ) then
+					saleCount = saleCount + amt
+
+					--take ore
+					ply:SetOre( oreType, ply:GetOre( oreType ) - amt )
+
+					--add money
+					local balance = PHATMINER_ORE_TYPES[ oreType ].value * amt
+					ply:addMoney( balance )
+
+					salePrice = salePrice + balance
+
+					ply:ChatPrint( string.format( "Sold %i %s(s) for $%i.", amt, oreType, balance ) )
+				else
+					ply:ChatPrint( string.format( "You don't have enough %s to complete this offer.", oreType ) )
+				end
+			end
+		end
+
+		ply:ChatPrint( string.format( "Sale complete, sold %i items for a total of $%i.", saleCount, salePrice ) )
+	else
+
+		ply:ChatPrint( "Sorry theres no ore trader nearby." )
+	end
+
+end )
+
 
 local sayings = {
 	Sound("vo/npc/vortigaunt/dedicate.wav"),
@@ -10,7 +64,6 @@ local sayings = {
 	Sound("vo/npc/vortigaunt/fmknowsbest.wav"),
 	Sound("vo/npc/vortigaunt/mystery.wav"),
 }
-	
 
 
 local models = {
@@ -18,60 +71,40 @@ local models = {
 }
 
 function ENT:Initialize()
-        self:SetModel( models[ math.random( #models ) ] )
-		self:SetColor( Color(255, 255, 255) )
-		self:SetRenderMode( RENDERMODE_TRANSCOLOR )
-		self:SetHealth(100)
-        self:SetMoveType( MOVETYPE_NONE )
-        self:SetSolid( SOLID_VPHYSICS )
-		if ( SERVER ) then self:PhysicsInit( SOLID_VPHYSICS ) end
-        local phys = self:GetPhysicsObject()
-        if ( IsValid( phys ) ) then phys:EnableMotion( false ) end
-		--self:PhysWake()
-		
-		self:SetSequence( 2 )
-		self.LastSaid = 0
-		
+	self:SetModel( models[ math.random( #models ) ] )
+	self:SetColor( Color(255, 255, 255) )
+	self:SetRenderMode( RENDERMODE_TRANSCOLOR )
+	self:SetHealth(100)
+	self:SetMoveType( MOVETYPE_NONE )
+	self:SetSolid( SOLID_VPHYSICS )
+	if ( SERVER ) then self:PhysicsInit( SOLID_VPHYSICS ) end
+	local phys = self:GetPhysicsObject()
+	if ( IsValid( phys ) ) then phys:EnableMotion( false ) end
+
+	self:SetSequence( 2 )
+	self.LastSaid = 0
 end
 
 function ENT:SpawnFunction( ply, tr, ClassName )
-        if ( !tr.Hit ) then return end
+	if ( !tr.Hit ) then return end
 
-        local size = math.random( 16, 48 )
-        local ent = ents.Create( ClassName )
-		
-        ent:SetPos( tr.HitPos + tr.HitNormal * size )
-        ent:Spawn()
-        ent:Activate()
-		
-        return ent
+	local ent = ents.Create( ClassName )
+
+	ent:SetPos( tr.HitPos + tr.HitNormal * 16 )
+	ent:Spawn()
+	ent:Activate()
+
+	return ent
 end
 
 function ENT:Use( activator, caller )
 	if IsValid( activator ) then
-		if (CurTime() > self.LastSaid + 3) then
+		if ( CurTime() > self.LastSaid + 2 ) then
 			self.LastSaid = CurTime()
-			
-			
-			local ore_count = activator:GetNWInt("unrefined_ore")
-			
-			if (ore_count > 0) then
-				activator:SetNWInt( "unrefined_ore", 0 )
-				self:EmitSound( sayings[ math.random( #sayings) ] )
-				
-				local exp_mining = activator:GetNWInt("exp_mining")
-				activator:SetNWInt("exp_mining", exp_mining + 10 * ore_count )
-				
-				local money = activator:GetNWInt("money")
-				activator:SetNWInt("money", money + ore_count*10 )
-				
-				
-				local chat_string = string.format("The trader gives you ($%i)", ore_count*10)
-				activator:ChatPrint( chat_string )
-				--Award exp
-			else
-				--Player has no ore
-			end
+
+			--Open ore menu
+			net.Start( "pm_openmenu" )
+			net.Send( activator )
 		else
 			--Asking to trade too fast
 		end
@@ -79,20 +112,8 @@ function ENT:Use( activator, caller )
 end
 
 function ENT:OnTakeDamage( dmginfo )
-
 	local activator = dmginfo:GetAttacker()
     if ( activator:IsPlayer() ) then
-		self:EmitSound( Sound )
-		local health = activator:Health()
-		activator:SetHealth( health + 1 )
+		--Smite player with vort beam
 	end
-	
-	
-	local dmg = dmginfo:GetDamage()
-	self:SetHealth( self:Health() - dmg )
-	
-	if self:Health() < 1 then
-		self:Remove()
-	end
-	
 end
