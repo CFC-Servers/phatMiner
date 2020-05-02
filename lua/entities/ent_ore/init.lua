@@ -5,21 +5,17 @@ include( "shared.lua" )
 
 local rock_locations = {
 	["gm_construct"] = {
-		[1] = Vector(0, 0, -100),
-		[2] = Vector(0, 250, -100),
-		[3] = Vector(0, 500, -100),
-		[4] = Vector(0, 750, -100),
-		[5] = Vector(0, 1000, -100),
+		[1] = Vector(0, 0, -90),
+		[2] = Vector(0, 250, -90),
+		[3] = Vector(0, 500, -90),
+		[4] = Vector(0, 750, -90),
+		[5] = Vector(0, 1000, -90),
 	}
 }
 
 local npc_locations = {
 	["gm_construct"] = {
-		[1] = Vector(0, 0, 100),
-		[2] = Vector(0, 250, 100),
-		[3] = Vector(0, 500, 100),
-		[4] = Vector(0, 750, 100),
-		[5] = Vector(0, 1000, 100),
+		[1] = Vector(200, 500, -150),
 	}
 }
 
@@ -28,13 +24,14 @@ local rock_models = {
 	[1] = "models/props_wasteland/rockcliff01f.mdl",
 	[2] = "models/props_wasteland/rockcliff01j.mdl",
 	[3] = "models/props_wasteland/rockcliff01k.mdl",
+	[4] = "models/props_wasteland/rockcliff01f.mdl",
+	[5] = "models/props_wasteland/rockgranite01a.mdl",
 }
 
 local HitSound = Sound("physics/glass/glass_bottle_impact_hard1.wav")
 
 hook.Add( "InitPostEntity", "OreCreate", function()
-
-	timer.Simple( 5, function()
+	timer.Simple( 3, function()
 		local map = game.GetMap()
 
 		if ( rock_locations[ map ] ) then
@@ -72,7 +69,6 @@ end )
 
 function ENT:Initialize()
 	self:SetModel( rock_models[ math.random( #rock_models ) ] )
-	self:SetColor( Color( 255, 255, 255, 255 ) )
 	self:SetRenderMode( RENDERMODE_TRANSCOLOR )
 	self:SetHealth( 100 )
 	self:SetMoveType( MOVETYPE_NONE )
@@ -161,7 +157,6 @@ function ENT:OnTakeDamage( dmginfo )
 	local effectdata = EffectData()
 	effectdata:SetOrigin( dmginfo:GetDamagePosition() )
 	util.Effect( "inflator_magic", effectdata )
-
 
 	if self.OutofOre then return end
 	if ( self:Health() < 15 ) then

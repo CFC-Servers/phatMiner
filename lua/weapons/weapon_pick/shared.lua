@@ -1,5 +1,7 @@
 AddCSLuaFile()
 
+local ShootSound = Sound("npc/vort/claw_swing2.wav")
+
 SWEP.Base = "weapon_base"
 SWEP.PrintName = "Pickaxe"
 SWEP.Author = "FubuDuckie"
@@ -8,9 +10,6 @@ SWEP.Category = "!Mining Entities"
 SWEP.Spawnable= true
 SWEP.AdminOnly = false
 SWEP.DisableDuplicator = true
-
-
-local ShootSound = Sound("npc/vort/claw_swing2.wav")
 SWEP.Primary.Damage = 1
 SWEP.Primary.TakeAmmo = 1
 SWEP.Primary.ClipSize = 9999
@@ -22,7 +21,6 @@ SWEP.Primary.Automatic = true
 SWEP.Primary.Recoil = 2
 SWEP.Primary.Delay = 1.2
 SWEP.Primary.Force = 250
-
 SWEP.Secondary.Delay = SWEP.Primary.Delay
 SWEP.Secondary.TakeAmmo = 0
 SWEP.Secondary.ClipSize	=  1
@@ -38,19 +36,19 @@ SWEP.Weight		= 5
 SWEP.AutoSwitchTo 	= true
 SWEP.AutoSwitchFrom = true
 
-SWEP.ViewModelFlip		= false
-SWEP.ViewModelFOV		= 60
-SWEP.ViewModel			= "models/weapons/c_crowbar.mdl"
-SWEP.WorldModel			= "models/weapons/w_crowbar.mdl"
-SWEP.UseHands           = true
+SWEP.ViewModelFlip = false
+SWEP.ViewModelFOV = 60
+SWEP.ViewModel = "models/weapons/c_crowbar.mdl"
+SWEP.WorldModel = "models/weapons/w_crowbar.mdl"
+SWEP.UseHands = true
 
-SWEP.HoldType = "melee2"
+SWEP.HoldType = "melee"
 SWEP.FiresUnderwater = true
 SWEP.CSMuzzleFlashes = false
 
 function SWEP:Initialize()
 	util.PrecacheSound( ShootSound )
-	self:SetWeaponHoldType( self.HoldType )
+	self:SetHoldType( self.HoldType )
 end
 
 
@@ -58,7 +56,6 @@ function SWEP:PrimaryAttack()
 
 	if ( !self:CanPrimaryAttack() ) then return end
 
-	--self:SendWeaponAnim( ACT_VM_SWINGHARD )
 	self:SendWeaponAnim( ACT_VM_HITCENTER )
 
 	local bullet = {}

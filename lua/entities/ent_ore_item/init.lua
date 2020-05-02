@@ -36,7 +36,11 @@ end
 function ENT:Use( activator, caller )
 	if IsValid( activator ) then
 		if ( self._oreID ) then
-			activator._phatItems[ self._oreID ] = activator._phatItems[ self._oreID ] + 1
+			if ( activator._phatItems[ self._oreID ] ) then
+				activator._phatItems[ self._oreID ] = activator._phatItems[ self._oreID ] + 1
+			else
+				--tried to pick item before info existed on player
+			end
 		end
 
 		local tbl = {
