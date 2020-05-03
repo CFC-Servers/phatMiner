@@ -75,29 +75,29 @@ local function createItem( iType, tItem, bShowSell, pParent )
 
 
 	local sButton = vgui.Create( "DButton", ore_button )
-	sButton:SetPos( 126, 4)
-	sButton:SetSize( 55, 21 )
+	sButton:SetPos( 126, 45)
+	sButton:SetSize( 50, 21 )
 	sButton:SetTextColor( Color(255,85,25) )
 	sButton:SetFont("GModNotify")
 	sButton:SetText( "SELL" )
 	sButton.DoClick = function( self )
 		net.Start("pm_oreexchange")
 		net.WriteTable({
-			[ k ] = prButton.tQuantities[ prButton.iQuantity ],
+			[ iType ] = menu_ores.tQuantities[ menu_ores.iQuantity ],
 		})
 		net.SendToServer()
 	end
 
 	local dButton = vgui.Create( "DButton", ore_button )
-	dButton:SetPos( 126, 30)
-	dButton:SetSize( 55, 21 )
+	dButton:SetPos( 126, 3)
+	dButton:SetSize( 50, 21 )
 	dButton:SetTextColor( Color(25,85,255) )
 	dButton:SetFont("GModNotify")
 	dButton:SetText( "DROP" )
 	dButton.DoClick = function( self )
 		net.Start("pm_dropore")
 		net.WriteTable({
-			[ k ] = prButton.tQuantities[ prButton.iQuantity ],
+			[ iType ] = menu_ores.tQuantities[ menu_ores.iQuantity ],
 		})
 		net.SendToServer()
 	end
@@ -129,6 +129,24 @@ function openMinerMenu( bShowSellButtons )
 				surface.DrawRect( 0, 0, wide, tall )
 			end
 
+			menu_ores.iQuantity = 1
+			menu_ores.tQuantities = { [1]=1, [2]=5, [3]=10 }
+
+			local prButton = vgui.Create( "DButton", menu_ores )
+			prButton:SetPos(0, 0)
+			prButton:SetFont("DermaLarge")
+			prButton:SetTextColor( Color(0, 255, 0) )
+			prButton:SetSize(70, 25)
+			prButton:SetText( string.format( "( %ix )",  menu_ores.tQuantities[ menu_ores.iQuantity ] ) )
+			prButton.DoClick = function( self )
+				menu_ores.iQuantity = menu_ores.iQuantity + 1
+				if (menu_ores.iQuantity > 3) then
+					menu_ores.iQuantity = 1
+				end
+
+				prButton:SetText( string.format( "(%ix)",  menu_ores.tQuantities[ menu_ores.iQuantity ] ) )
+			end
+
 
 			local ore_scroller = vgui.Create( "DScrollPanel", menu_ores )
 			ore_scroller:Dock( FILL )
@@ -149,31 +167,13 @@ function openMinerMenu( bShowSellButtons )
 				draw.RoundedBox(0, 0, 0, w, h, Color(255, 255, 255, 255))
 			end
 
-			local prButton = vgui.Create( "DButton", menu_ores )
-			prButton:SetPos(0, 0)
-			prButton:SetFont("DermaLarge")
-			prButton:SetTextColor( Color(0, 255, 0) )
-			prButton:SetSize(70, 25)
-			prButton.iQuantity = 1
-			prButton.tQuantities = { [1]=1, [2]=5, [3]=10 }
-			prButton:SetText( string.format( "(%ix)",  prButton.tQuantities[ prButton.iQuantity ] ) )
-
-			prButton.DoClick = function( self )
-				self.iQuantity = self.iQuantity + 1
-				if (self.iQuantity > 3) then
-					self.iQuantity = 1
-				end
-
-				prButton:SetText( string.format( "(%ix)",  prButton.tQuantities[ prButton.iQuantity ] ) )
-			end
-
 
 			if ( bShowSellButtons ) then
 				menu_ores:MakePopup()
 			end
 
 			for k, vOre in pairs( PHATMINER_ORE_TYPES ) do
-				local ore_button = createItem(1, vOre, bShowSellButtons, menu_ores)
+				local ore_button = createItem(k, vOre, bShowSellButtons, menu_ores)
 				ore_scroller:Add( ore_button )
 			end
 

@@ -100,6 +100,7 @@ PHATMINER_ORE_TYPES = {
 		["chance"] = 30,
 	},
 
+	--Special types
 
 	["egg"] = {
 		["name"] = "Easter Egg",
@@ -108,6 +109,14 @@ PHATMINER_ORE_TYPES = {
 		["mat"] = "",
 		["value"] = 3,
 		["chance"] = 1,
+		["magicFunction"] = function( data )
+
+			if (data.HitEntity) then
+				data.HitEntity:Respawn()
+				data.HitEntity:SetModelScale(0.5, 1)
+			end
+
+		end
 	},
 
 	["rune_air"] = {
@@ -117,6 +126,13 @@ PHATMINER_ORE_TYPES = {
 		["mat"] = "phoenix_storms/wire/pcb_blue",
 		["value"] = 150,
 		["chance"] = -1,
+		["magicFunction"] = function( data )
+
+			if (data.HitEntity) then
+				data.HitEntity:SetVelocity( Vector(0, 0, 800) )
+			end
+
+		end
 	},
 
 	["rune_fire"] = {
@@ -126,9 +142,13 @@ PHATMINER_ORE_TYPES = {
 		["mat"] = "phoenix_storms/wire/pcb_red",
 		["value"] = 150,
 		["chance"] = -1,
-		["magicFunction"] = function( ent, own )
+		["magicFunction"] = function( data )
 
-		end
+			if (data.HitEntity) then
+				data.HitEntity:Ignite(3)
+			end
+
+		end,
 	},
 
 	["rune_nature"] = {
@@ -138,8 +158,12 @@ PHATMINER_ORE_TYPES = {
 		["mat"] = "phoenix_storms/wire/pcb_green",
 		["value"] = 150,
 		["chance"] = -1,
-		["magicFunction"] = function( ent, own )
+		["magicFunction"] = function( data )
 
-		end
+			if (data.HitEntity) then
+				data.HitEntity:SetHealth( math.Clamp( data.HitEntity:Health() + 15,  0, data.HitEntity:GetMaxHealth() ) )
+			end
+
+		end,
 	},
 }

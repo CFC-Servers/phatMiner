@@ -12,11 +12,11 @@ net.Receive( "magic_particle", function()
 	for i = 0, 64 do
 		local part = emitter:Add( particleName, pos )
 		if ( part ) then
-			part:SetDieTime( 2 )
+			part:SetDieTime( 3 )
 			part:SetStartSize( 3 )
 			part:SetEndSize( 3 )
 			part:SetGravity( Vector( 0, 0, -250 ) )
-			part:SetVelocity( VectorRand() * 50 )
+			part:SetVelocity( VectorRand() * 25 )
 		end
 	end
 

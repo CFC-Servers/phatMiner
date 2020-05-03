@@ -25,7 +25,6 @@ local rock_models = {
 	[2] = "models/props_wasteland/rockcliff01j.mdl",
 	[3] = "models/props_wasteland/rockcliff01k.mdl",
 	[4] = "models/props_wasteland/rockcliff01f.mdl",
-	[5] = "models/props_wasteland/rockgranite01a.mdl",
 }
 
 local HitSound = Sound("physics/glass/glass_bottle_impact_hard1.wav")

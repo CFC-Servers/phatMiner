@@ -48,8 +48,7 @@ net.Receive( "pm_oreexchange", function(len, ply)
 				end
 			end
 		end
-
-		ply:ChatPrint( string.format( "Sale complete, sold %i items for a total of $%i.", saleCount, salePrice ) )
+		--ply:ChatPrint( string.format( "Sale complete, sold %i items for a total of $%i.", saleCount, salePrice ) )
 	else
 
 		ply:ChatPrint( "Sorry theres no ore trader nearby." )
