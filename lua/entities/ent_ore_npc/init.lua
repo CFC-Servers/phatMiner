@@ -6,12 +6,45 @@ print("[phatMiner] Ore Trader (NPC)")
 
 util.AddNetworkString( "pm_oreexchange" )
 util.AddNetworkString( "pm_openmenu" )
+util.AddNetworkString( "pm_dropore" )
 
+net.Receive( "pm_dropore", function( len, ply )
+	local oreTable = net.ReadTable()
+
+	for oreType, amt in pairs( oreTable ) do
+		if ( PHATMINER_ORE_TYPES[ oreType ] ) then
+
+			if ( amt > 10 ) then
+				ply:ChatPrint( string.format( "You can drop 10 %s at a time.", oreType ) )
+				amt = 10
+			end
+
+			amt = math.abs( amt )
+
+			if ( ply:GetOre( oreType ) >= amt ) then
+
+				for i = 0, amt do
+					local dropped_Ore = ents.Create( "ent_ore_item" )
+					dropped_Ore:SetPos( ply:GetPos() )
+					dropped_Ore:Spawn()
+					dropped_Ore:Activate()
+					dropped_Ore:PhysWake()
+
+					dropped_Ore._oreID = oreType
+					dropped_Ore:SetModel( PHATMINER_ORE_TYPES[ oreType ].model )
+					dropped_Ore:SetColor( PHATMINER_ORE_TYPES[ oreType ].color )
+					dropped_Ore:SetMaterial( PHATMINER_ORE_TYPES[ oreType ].mat )
+				end
+
+				ply:SetOre( oreType, ply:GetOre( oreType ) - amt )
+
+			end
+		end
+	end
+end )
 
 net.Receive( "pm_oreexchange", function(len, ply)
 	local oreTable = net.ReadTable()
-
-
 	local entsNear = ents.FindInSphere( ply:GetPos(), 240 )
 	local foundTrader = false
 
@@ -48,14 +81,13 @@ net.Receive( "pm_oreexchange", function(len, ply)
 				end
 			end
 		end
-
-		ply:ChatPrint( string.format( "Sale complete, sold %i items for a total of $%i.", saleCount, salePrice ) )
+		--ply:ChatPrint( string.format( "Sale complete, sold %i items for a total of $%i.", saleCount, salePrice ) )
 	else
 
 		ply:ChatPrint( "Sorry theres no ore trader nearby." )
 	end
-
 end )
+
 
 
 local sayings = {

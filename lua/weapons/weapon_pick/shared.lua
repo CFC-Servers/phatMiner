@@ -28,10 +28,10 @@ SWEP.Secondary.DefaultClip = 1
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo	= "none"
 
-SWEP.Slot = 1
+SWEP.Slot = 4
 SWEP.SlotPos = 1
 SWEP.DrawCrosshair	= true
-SWEP.DrawAmmo	= true
+SWEP.DrawAmmo	= false
 SWEP.Weight		= 5
 SWEP.AutoSwitchTo 	= true
 SWEP.AutoSwitchFrom = true

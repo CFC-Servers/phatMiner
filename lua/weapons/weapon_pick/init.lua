@@ -18,6 +18,14 @@ end
 function pmeta:SetOre( tOre, amt )
 		if ( self._phatItems[ tOre ] ) then
 			self._phatItems[ tOre ] = amt
+
+			if ( SERVER ) then
+				net.Start("phatminer_stats")
+				net.WriteTable( {
+					[ tOre ] = amt
+				} )
+				net.Send( self )
+			end
 		else
 			print( string.format( "[phatMiner] We tried to set data before it existed on Player: %s, Type: %s.", self:AccountID(), tOre ) )
 		end
@@ -95,11 +103,5 @@ hook.Add("PlayerInitialSpawn", "phatMiner-Spawn", function( pl, transition )
 		local amount = sql.QueryValue( string.format( "SELECT %s FROM pm_oredata WHERE uid = '".. uid .. "'", k) )
 		pl._phatItems[ k ] = amount
 	end
-
-	--[[load rune stats
-	for k, v in pairs( PHATMINER_ITEM_TYPES ) do
-		local amount = sql.QueryValue( string.format( "SELECT %s FROM pm_oredata WHERE uid = '".. uid .. "'", k) )
-		pl._phatItems[ k ] = amount
-	end]]
 
 end)

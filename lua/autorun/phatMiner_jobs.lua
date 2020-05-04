@@ -7,10 +7,37 @@
 	weapons = {"weapon_pick"},
 	command = "miner",
 	max = 0,
-	salary = 250,
+	salary = 160,
 	admin = 0,
 	vote = false,
 	hasLicense = false,
 	candemote = true,
 	category = "Citizens"
 }) ]]
+
+
+--[[ --add to darkrpmodification/shipments.lua
+DarkRP.createShipment("Pickaxe", {
+    model = "models/weapons/w_crowbar.mdl",
+    entity = "weapon_pick",
+    price = 10000,
+    amount = 5,
+    separate = true,
+    pricesep = 1100,
+    noship = false,
+    allowed = {TEAM_MINER},
+})
+
+DarkRP.createShipment("Tesla Drill", {
+    model = "models/weapons/w_physics.mdl",
+    entity = "weapon_drill",
+    price = 50000,
+    amount = 5,
+    separate = true,
+    pricesep = 11000,
+    noship = false,
+    allowed = {TEAM_MINER},
+})
+
+
+]]
