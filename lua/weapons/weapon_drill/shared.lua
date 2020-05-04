@@ -39,7 +39,6 @@ SWEP.FiresUnderwater = true
 SWEP.CSMuzzleFlashes = false
 
 function SWEP:Initialize()
-	util.PrecacheSound( ShootSound )
 	self:SetWeaponHoldType( self.HoldType )
 end
 

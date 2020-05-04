@@ -9,37 +9,46 @@ util.AddNetworkString( "pm_openmenu" )
 util.AddNetworkString( "pm_dropore" )
 
 net.Receive( "pm_dropore", function( len, ply )
-	local oreTable = net.ReadTable()
 
-	for oreType, amt in pairs( oreTable ) do
-		if ( PHATMINER_ORE_TYPES[ oreType ] ) then
+	if ( ply.lastCommand and CurTime() > ply.lastCommand + 1 ) then
+		ply.lastCommand = CurTime()
 
-			if ( amt > 10 ) then
-				ply:ChatPrint( string.format( "You can drop 10 %s at a time.", oreType ) )
-				amt = 10
-			end
+		local oreTable = net.ReadTable()
 
-			amt = math.abs( amt )
+		PrintTable(oreTable)
 
-			if ( ply:GetOre( oreType ) >= amt ) then
+		for oreType, amt in pairs( oreTable ) do
+			if ( PHATMINER_ORE_TYPES[ oreType ] ) then
 
-				for i = 0, amt do
-					local dropped_Ore = ents.Create( "ent_ore_item" )
-					dropped_Ore:SetPos( ply:GetPos() )
-					dropped_Ore:Spawn()
-					dropped_Ore:Activate()
-					dropped_Ore:PhysWake()
-
-					dropped_Ore._oreID = oreType
-					dropped_Ore:SetModel( PHATMINER_ORE_TYPES[ oreType ].model )
-					dropped_Ore:SetColor( PHATMINER_ORE_TYPES[ oreType ].color )
-					dropped_Ore:SetMaterial( PHATMINER_ORE_TYPES[ oreType ].mat )
+				if ( amt > 10 ) then
+					ply:ChatPrint( string.format( "You can drop 10 %s at a time.", oreType ) )
+					amt = 10
 				end
 
-				ply:SetOre( oreType, ply:GetOre( oreType ) - amt )
+				amt = math.abs( amt )
 
+				if ( ply:GetOre( oreType ) >= amt ) then
+
+					for i = 1, amt do
+						local dropped_Ore = ents.Create( "ent_ore_item" )
+						dropped_Ore:SetPos( ply:GetPos() )
+						dropped_Ore:Spawn()
+						dropped_Ore:Activate()
+						dropped_Ore:PhysWake()
+
+						dropped_Ore._oreID = oreType
+						dropped_Ore:SetModel( PHATMINER_ORE_TYPES[ oreType ].model )
+						dropped_Ore:SetColor( PHATMINER_ORE_TYPES[ oreType ].color )
+						dropped_Ore:SetMaterial( PHATMINER_ORE_TYPES[ oreType ].mat )
+					end
+
+					ply:SetOre( oreType, ply:GetOre( oreType ) - amt )
+
+				end
 			end
 		end
+	else
+		ply:ChatPrint( "Slow down, these rocks are heavy.")
 	end
 end )
 
@@ -84,7 +93,7 @@ net.Receive( "pm_oreexchange", function(len, ply)
 		--ply:ChatPrint( string.format( "Sale complete, sold %i items for a total of $%i.", saleCount, salePrice ) )
 	else
 
-		ply:ChatPrint( "Sorry theres no ore trader nearby." )
+		ply:ChatPrint( "Theres no ore trader nearby." )
 	end
 end )
 
@@ -106,7 +115,7 @@ function ENT:Initialize()
 	self:SetModel( models[ math.random( #models ) ] )
 	self:SetColor( Color(255, 255, 255) )
 	self:SetRenderMode( RENDERMODE_TRANSCOLOR )
-	self:SetHealth(100)
+	self:SetHealth( 9999 )
 	self:SetMoveType( MOVETYPE_NONE )
 	self:SetSolid( SOLID_VPHYSICS )
 	if ( SERVER ) then self:PhysicsInit( SOLID_VPHYSICS ) end
@@ -147,5 +156,17 @@ function ENT:OnTakeDamage( dmginfo )
 	local activator = dmginfo:GetAttacker()
     if ( activator:IsPlayer() ) then
 		--Smite player with vort beam
+
+		self:SetSequence( "zapattack1" )
+		self:SetAngles( ( activator:GetPos() - self:GetPos()):Angle() )
+
+
+		timer.Simple( 1.4, function()
+			util.ParticleTracerEx( "vortigaunt_beam", self:GetPos() + Vector(0,0,45), activator:GetPos() + Vector(0, 0, 30), true, 0, -1 )
+			self:SetSequence( 2 )
+
+			activator:SetHealth( activator:Health() / 2 )
+		end )
+
 	end
 end

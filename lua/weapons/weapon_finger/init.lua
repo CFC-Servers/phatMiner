@@ -50,11 +50,11 @@ function SWEP:ShootMagic( magic_type, mana_used )
 
 			local split_required_runes = string.Explode( "+", spell )
 
-			for _, rune_name in pairs( split_required_runes ) do
+			for _, rune_name in pairs( split_required_runwes ) do
 
 				local own_ore_count = owner:GetOre( rune_name )
 
-				if ( own_ore_count > 0 ) then
+				if ( own_ore_count > 0 ) thenw
 
 					owner:SetOre( rune_name, own_ore_count - 1 )
 
@@ -114,7 +114,7 @@ end
 function SWEP:SecondaryAttack()
 
 	magic_selected = magic_selected + 1
-	if (magic_selected > #magic_spells) then
+	if ( magic_selected > #magic_spells ) then
 		magic_selected = 1
 	end
 

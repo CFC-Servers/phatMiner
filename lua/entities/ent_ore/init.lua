@@ -28,9 +28,9 @@ local rock_models = {
 }
 
 local HitSounds = {
-	Sound("physics/glass/glass_bottle_impact_hard1.wav"),
-	Sound("physics/glass/glass_bottle_impact_hard2.wav"),
-	Sound("physics/glass/glass_bottle_impact_hard3.wav"),
+	"physics/glass/glass_bottle_impact_hard1.wav",
+	"physics/glass/glass_bottle_impact_hard2.wav",
+	"physics/glass/glass_bottle_impact_hard3.wav",
 }
 
 hook.Add( "InitPostEntity", "OreCreate", function()
@@ -127,11 +127,12 @@ function ENT:OnTakeDamage( dmginfo )
 		col.b = math.Clamp( col.b - dmg, 0, 255 )
 		self:SetColor( col )
 
+		local vHitPos = activator:GetEyeTrace().HitPos
 
-		self:EmitSound( table.Random( HitSounds ) )
+		sound.Play( table.Random( HitSounds ), vHitPos )
 
 		local dropped_Ore = ents.Create( "ent_ore_item" )
-		dropped_Ore:SetPos( activator:GetEyeTrace().HitPos )
+		dropped_Ore:SetPos( vHitPos )
 		dropped_Ore:SetModelScale(0)
 		dropped_Ore:Spawn()
 		dropped_Ore:Activate()
@@ -172,13 +173,15 @@ function ENT:OnTakeDamage( dmginfo )
 		explode:Fire( "Explode", 0, 0 )
 		explode:Remove()
 
-		timer.Simple( 2, function()
-			local new_rock = ents.Create( "ent_ore" )
-			new_rock:SetModel( old_model )
-			new_rock:SetPos( old_pos )
-			new_rock:SetAngles( old_ang )
-			new_rock:Spawn()
-		end )
+		if not ( self.noRespawn ) then
+			timer.Simple( 2, function()
+				local new_rock = ents.Create( "ent_ore" )
+				new_rock:SetModel( old_model )
+				new_rock:SetPos( old_pos )
+				new_rock:SetAngles( old_ang )
+				new_rock:Spawn()
+			end )
+		end
 
 		self:Remove()
 	end

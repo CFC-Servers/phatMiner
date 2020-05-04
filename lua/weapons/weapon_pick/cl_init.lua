@@ -26,7 +26,7 @@ net.Receive( "phatminer_stats", function(len)
 	if (PHATMINER_ORE_TYPES) then
 		for k, v in pairs( stat_table ) do
 			if (PHATMINER_ORE_TYPES[ k ]) then
-				PHATMINER_ORE_TYPES[ k ].amount = v
+				PHATMINER_ORE_TYPES[ k ].amount = tonumber(v)
 			end
 		end
 	end
@@ -40,24 +40,25 @@ local menu_material = Material( "vgui/gradient-l" )
 local function createItem( iType, tItem, bShowSell, pParent )
 
 	local rAmount = ( tItem.amount or 1 ) * tItem.value
-	local sAmount = 0
+	local sAmount = 1
 
 	local ore_button = vgui.Create( "DButton", pParent )
 	ore_button:SetFont( "phatlabel" )
 	ore_button:SetText( "" )
 	ore_button:SetSize( 90, 75 )
 	ore_button:Dock( TOP )
+	ore_button:DockMargin( 5, 0, 0, 0 )
 	ore_button:SetTextColor( tItem.color )
 	ore_button.Paint = function( self )
 		local wide, tall = self:GetWide(), self:GetTall()
 		surface.SetDrawColor( 0, 0, 0, 255 )
 		surface.DrawOutlinedRect( 0, 0, wide, tall )
 
-		draw.SimpleTextOutlined( tItem.name or "Loading...", "phatlabel", 152, 10, tItem.color, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER	, 2, Color(0,0,0) )
-		draw.SimpleTextOutlined( tItem.amount or "Loading...", "phatlabel", 152, 30, Color(255,255,255,255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 2, Color(0,0,0) )
+		draw.SimpleTextOutlined( tItem.name or "Loading...", "phatlabel", 158, 10, tItem.color, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER	, 2, Color(0,0,0) )
+		draw.SimpleTextOutlined( sAmount, "phatlabel", 158, 30, Color(255,255,255,255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 2, Color(0,0,0) )
 
-		draw.SimpleTextOutlined( string.format("%s", sAmount ), "phatlabel", 76, 58, Color(255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 2, Color(0,0,0) )
-		draw.SimpleTextOutlined( string.format( "$%s", sAmount * tItem.value ), "phatlabel", 152, 48, Color(0,255,25), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 2, Color(0,0,0) )
+		draw.SimpleTextOutlined( string.format("%s", tItem.amount ), "phatlabel", 76, 58, Color(255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 2, Color(0,0,0) )
+		draw.SimpleTextOutlined( string.format( "$%s", string.Comma(sAmount * tItem.value) ), "phatlabel", 158, 48, Color(0,255,25), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 2, Color(0,0,0) )
 	end
 
 	local ore_model = vgui.Create("DModelPanel", ore_button )
@@ -98,7 +99,7 @@ local function createItem( iType, tItem, bShowSell, pParent )
 	end
 
 	local bSell = vgui.Create( "DButton", ore_button )
-	bSell:SetPos( 112, 60)
+	bSell:SetPos( 118, 60)
 	bSell:SetSize( 40, 15 )
 	bSell:SetTextColor( Color(0,200,0) )
 	bSell:SetFont("DebugFixed")
@@ -129,6 +130,7 @@ local function createItem( iType, tItem, bShowSell, pParent )
 
 end
 
+
 function openMinerMenu( bShowSellButtons )
 	if ( CurTime() > menu_next ) then
 		menu_next = CurTime() + 0.5
@@ -154,7 +156,7 @@ function openMinerMenu( bShowSellButtons )
 
 			local ore_scroller = vgui.Create( "DScrollPanel", menu_ores )
 			ore_scroller:Dock( FILL )
-			ore_scroller:DockMargin( 0, -20, 0, 0 )
+			ore_scroller:DockMargin( 0, 0, 0, 0 )
 
 			local sbar = ore_scroller:GetVBar()
 			sbar:SetWidth(10)
@@ -176,8 +178,10 @@ function openMinerMenu( bShowSellButtons )
 			menu_ores:MakePopup()
 
 			for k, vOre in pairs( PHATMINER_ORE_TYPES ) do
-				local ore_button = createItem(k, vOre, bShowSellButtons, menu_ores)
-				ore_scroller:Add( ore_button )
+				if (vOre.amount and vOre.amount > 0) then
+					local ore_button = createItem(k, vOre, bShowSellButtons, menu_ores)
+					ore_scroller:Add( ore_button )
+				end
 			end
 
 		else

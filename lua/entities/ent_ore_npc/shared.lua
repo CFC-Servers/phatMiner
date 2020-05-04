@@ -8,3 +8,5 @@ ENT.PrintName = "Ore Trader (NPC)"
 ENT.Category = "!Mining Entities"
 ENT.Spawnable = true
 ENT.AutomaticFrameAdvance = false
+
+PrecacheParticleSystem( "vortigaunt_beam" )

@@ -14,6 +14,7 @@ local pl_meta = FindMetaTable("Player")
 function ENT:PhysicsCollide(data, physobj)
 
 	if (magic_spells[ magic_selected ]) then
+		data.Entity = self
 		magic_spells[ magic_selected ].magicFunction( data )
 	end
 
@@ -23,7 +24,6 @@ function ENT:PhysicsCollide(data, physobj)
 	end
 
 	local cur_velocity = physobj:GetVelocity()
-	--cur_velocity:Normalize()
 	local next_velocity = cur_velocity * 0.5
 	physobj:SetVelocity( next_velocity )
 end

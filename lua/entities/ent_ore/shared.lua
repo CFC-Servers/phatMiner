@@ -61,8 +61,8 @@ PHATMINER_ORE_TYPES = {
 	["diamond"] = {
 		["name"] = "Diamond",
 		["model"] = "models/holograms/icosphere.mdl",
-		["color"] = Color(127, 255, 255),
-		["mat"] = "models/shiny",
+		["color"] = Color(255, 255, 255),
+		["mat"] = "models/props_combine/stasisshield_sheet",
 		["value"] = 3200,
 		["chance"] = 1,
 	},
@@ -109,14 +109,18 @@ PHATMINER_ORE_TYPES = {
 		["mat"] = "",
 		["value"] = 3,
 		["chance"] = 0.5,
-		["magicFunction"] = function( data, own )
+		["magicFunction"] = function( data )
 
-			if (data.HitEntity) then
-				data.HitEntity:Respawn()
-				data.HitEntity:SetModelScale( 0.5, 1 )
+			if (data.HitPos) then
+				local new_rock = ents.Create( "ent_ore" )
+				new_rock:SetPos( data.HitPos )
+				new_rock:Spawn()
+				new_rock.noRespawn = true
+
+				SafeRemoveEntity(data.Entity)
 			end
 
-			return "egg+rune_air+rune_fire+rune_nature"
+			return "egg"
 
 		end
 	},
@@ -127,8 +131,8 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(255, 255, 255, 200),
 		["mat"] = "phoenix_storms/wire/pcb_blue",
 		["value"] = 150,
-		["chance"] = -1,
-		["magicFunction"] = function( data, own )
+		["chance"] = 111,
+		["magicFunction"] = function( data )
 
 			if (data.HitEntity) then
 				data.HitEntity:SetVelocity( Vector(0, 0, 800) )
@@ -145,8 +149,8 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(255, 255, 255, 200),
 		["mat"] = "phoenix_storms/wire/pcb_red",
 		["value"] = 150,
-		["chance"] = -1,
-		["magicFunction"] = function( data, own )
+		["chance"] = 111,
+		["magicFunction"] = function( data )
 
 			if (data.HitEntity) then
 				data.HitEntity:Ignite(3)
@@ -163,8 +167,8 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(255, 255, 255, 200),
 		["mat"] = "phoenix_storms/wire/pcb_green",
 		["value"] = 150,
-		["chance"] = -1,
-		["magicFunction"] = function( data, own )
+		["chance"] = 111,
+		["magicFunction"] = function( data )
 
 			if (data.HitEntity) then
 				data.HitEntity:SetHealth( math.Clamp( data.HitEntity:Health() + 15,  0, data.HitEntity:GetMaxHealth() ) )

@@ -12,10 +12,15 @@ function ENT:Draw()
 	loc_ang:RotateAroundAxis( loc_ang:Right(), 90 )
 
 	cam.Start3D2D( pos, Angle(0, loc_ang.y, 90), 0.2 )
-		draw.DrawText( "Ore Exchange", "TargetID", 0, 0, Color(225, 225, 0), TEXT_ALIGN_CENTER )
+		draw.DrawText( "Ore Exchange", "TargetID", 0, 0, Color(255, 255, 0), TEXT_ALIGN_CENTER )
 	cam.End3D2D()
+end
+
+local function openCraftMenu()
+
 end
 
 net.Receive( "pm_openmenu", function()
 	openMinerMenu( true )
+	openCraftMenu()
 end )

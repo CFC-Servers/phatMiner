@@ -17,7 +17,7 @@ end
 
 function pmeta:SetOre( tOre, amt )
 		if ( self._phatItems[ tOre ] ) then
-			self._phatItems[ tOre ] = amt
+			self._phatItems[ tOre ] = tonumber( amt )
 
 			if ( SERVER ) then
 				net.Start("phatminer_stats")
@@ -78,6 +78,8 @@ hook.Add("Initialize", "phatMiner-Initialize", function()
 end)
 
 hook.Add("PlayerInitialSpawn", "phatMiner-Spawn", function( pl, transition )
+
+	pl.lastCommand = 0
 
 	local uid = pl:AccountID()
 
