@@ -27,7 +27,11 @@ local rock_models = {
 	[4] = "models/props_wasteland/rockcliff01f.mdl",
 }
 
-local HitSound = Sound("physics/glass/glass_bottle_impact_hard1.wav")
+local HitSounds = {
+	Sound("physics/glass/glass_bottle_impact_hard1.wav"),
+	Sound("physics/glass/glass_bottle_impact_hard2.wav"),
+	Sound("physics/glass/glass_bottle_impact_hard3.wav"),
+}
 
 hook.Add( "InitPostEntity", "OreCreate", function()
 	timer.Simple( 3, function()
@@ -105,7 +109,8 @@ function ENT:OnTakeDamage( dmginfo )
 	local activator = dmginfo:GetAttacker()
 
     if ( activator:IsPlayer() ) then
-		if (activator:GetActiveWeapon():GetClass() ~= "weapon_pick") then
+			local weapon_class = activator:GetActiveWeapon():GetClass()
+		if (weapon_class ~= "weapon_pick" and weapon_class ~= "weapon_drill") then
 			activator:ChatPrint( "You need a pickaxe to mine this." )
 			return
 		end
@@ -123,7 +128,7 @@ function ENT:OnTakeDamage( dmginfo )
 		self:SetColor( col )
 
 
-		self:EmitSound( HitSound )
+		self:EmitSound( table.Random( HitSounds ) )
 
 		local dropped_Ore = ents.Create( "ent_ore_item" )
 		dropped_Ore:SetPos( activator:GetEyeTrace().HitPos )

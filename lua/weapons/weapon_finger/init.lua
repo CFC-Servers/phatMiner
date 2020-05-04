@@ -9,7 +9,7 @@ magic_selected = 1
 
 timer.Simple(3, function()
 	for k, v in pairs( PHATMINER_ORE_TYPES ) do
-		if ( v.magicFunction) then
+		if ( v.magicFunction ) then
 			table.insert( magic_spells, v )
 		end
 	end
@@ -29,6 +29,9 @@ end
 function SWEP:ShootMagic( magic_type, mana_used )
 	local owner = self.Owner
 
+
+	print(magic_spells[ magic_selected ])
+
 	local magic_orb = ents.Create( "ent_magic" )
 
 	magic_orb:SetOwner( owner )
@@ -41,33 +44,55 @@ function SWEP:ShootMagic( magic_type, mana_used )
 		magic_orb:SetColor( magic_spells[ magic_selected ].color )
 		magic_orb:SetMaterial( magic_spells[ magic_selected ].mat )
 
-		if ( magic_spells[ magic_selected ].magicFunction( self ) ) then
+		local spell = magic_spells[ magic_selected ].magicFunction( self )
+
+		if ( spell ) then
+
+			local split_required_runes = string.Explode( "+", spell )
+
+			for _, rune_name in pairs( split_required_runes ) do
+
+				local own_ore_count = owner:GetOre( rune_name )
+
+				if ( own_ore_count > 0 ) then
+
+					owner:SetOre( rune_name, own_ore_count - 1 )
+
+				else
+
+					SafeRemoveEntity( magic_orb )
+
+				end
+
+			end
 
 		else
-			--not enough materials
-			--SafeRemoveEntity( magic_orb )
+
 		end
 
 	end
 
 	timer.Simple(0.01, function()
-		local phys = magic_orb:GetPhysicsObject()
-		if ( !IsValid( phys ) ) then
-			magic_orb:Remove()
-			return
-		end
 
-		phys:EnableGravity(false)
-
-		local velocity = owner:GetAimVector() * 1000
-		phys:ApplyForceCenter( velocity )
-
-		timer.Simple( 2.8, function()
-			if IsValid( magic_orb ) then
-				magic_orb:StopParticles()
+		if (IsValid(magic_orb)) then
+			local phys = magic_orb:GetPhysicsObject()
+			if ( !IsValid( phys ) ) then
 				magic_orb:Remove()
+				return
 			end
-		end )
+
+			phys:EnableGravity(false)
+
+			local velocity = owner:GetAimVector() * 1000
+			phys:ApplyForceCenter( velocity )
+
+			timer.Simple( 2.8, function()
+				if IsValid( magic_orb ) then
+					magic_orb:StopParticles()
+					magic_orb:Remove()
+				end
+			end )
+		end
 	end)
 end
 

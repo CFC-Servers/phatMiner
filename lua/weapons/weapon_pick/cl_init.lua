@@ -33,16 +33,19 @@ net.Receive( "phatminer_stats", function(len)
 end )
 
 
-local menu_ores = false
+menu_ores = false
 local menu_next = CurTime()
 local menu_material = Material( "vgui/gradient-l" )
 
 local function createItem( iType, tItem, bShowSell, pParent )
 
+	local rAmount = ( tItem.amount or 1 ) * tItem.value
+	local sAmount = 0
+
 	local ore_button = vgui.Create( "DButton", pParent )
 	ore_button:SetFont( "phatlabel" )
 	ore_button:SetText( "" )
-	ore_button:SetSize( 100, 75 )
+	ore_button:SetSize( 90, 75 )
 	ore_button:Dock( TOP )
 	ore_button:SetTextColor( tItem.color )
 	ore_button.Paint = function( self )
@@ -50,56 +53,76 @@ local function createItem( iType, tItem, bShowSell, pParent )
 		surface.SetDrawColor( 0, 0, 0, 255 )
 		surface.DrawOutlinedRect( 0, 0, wide, tall )
 
-		draw.SimpleTextOutlined( tItem.name or "Loading...", "phatlabel", 120, 10, tItem.color, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER	, 2, Color(0,0,0) )
-		draw.SimpleTextOutlined( tItem.amount or "Loading...", "phatlabel", 120, 30, Color(255,255,255,255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 2, Color(0,0,0) )
+		draw.SimpleTextOutlined( tItem.name or "Loading...", "phatlabel", 152, 10, tItem.color, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER	, 2, Color(0,0,0) )
+		draw.SimpleTextOutlined( tItem.amount or "Loading...", "phatlabel", 152, 30, Color(255,255,255,255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 2, Color(0,0,0) )
 
-		if ( bShowSellButtons ) then
-			draw.SimpleTextOutlined( "$" .. ( tItem.amount or 0 * tItem.value ), "phatlabel", 70, 85, Color(0,255,0,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, Color(0,0,0) )
-		end
-
+		draw.SimpleTextOutlined( string.format("%s", sAmount ), "phatlabel", 76, 58, Color(255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 2, Color(0,0,0) )
+		draw.SimpleTextOutlined( string.format( "$%s", sAmount * tItem.value ), "phatlabel", 152, 48, Color(0,255,25), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 2, Color(0,0,0) )
 	end
 
 	local ore_model = vgui.Create("DModelPanel", ore_button )
-	ore_model:SetPos( -10, -8 )
+	ore_model:SetPos( 10, -8 )
 	ore_model:SetSize( 100, 100 )
 	ore_model:SetModel( tItem.model )
 	ore_model:SetColor( tItem.color )
 	ore_model:SetLookAt( Vector(0 ,0 ,0) )
+	ore_model:SetFOV(80)
 
 	function ore_model:LayoutEntity( Entity )
-		ore_model:SetFOV(80)
-
 		Entity:SetMaterial( tItem.mat )
 		Entity:SetModelScale(5)
 	return end
 
-
-	local sButton = vgui.Create( "DButton", ore_button )
-	sButton:SetPos( 126, 45)
-	sButton:SetSize( 50, 21 )
-	sButton:SetTextColor( Color(255,85,25) )
-	sButton:SetFont("GModNotify")
-	sButton:SetText( "SELL" )
-	sButton.DoClick = function( self )
-		net.Start("pm_oreexchange")
-		net.WriteTable({
-			[ iType ] = menu_ores.tQuantities[ menu_ores.iQuantity ],
-		})
-		net.SendToServer()
+	local bOreMinus = vgui.Create( "DButton", ore_button )
+	bOreMinus:SetPos( 70, 45)
+	bOreMinus:Dock( LEFT )
+	bOreMinus:SetSize( 25, 25 )
+	bOreMinus:SetTextColor( Color(255,0,0) )
+	bOreMinus:SetFont("GModNotify")
+	bOreMinus:SetText( "" )
+	bOreMinus:SetIcon( "icon16/delete.png" )
+	bOreMinus.DoClick = function( self )
+		sAmount = math.Clamp( sAmount - 1, 0, tItem.amount )
 	end
 
-	local dButton = vgui.Create( "DButton", ore_button )
-	dButton:SetPos( 126, 3)
-	dButton:SetSize( 50, 21 )
-	dButton:SetTextColor( Color(25,85,255) )
-	dButton:SetFont("GModNotify")
-	dButton:SetText( "DROP" )
-	dButton.DoClick = function( self )
+	local bOreAdd = vgui.Create( "DButton", ore_button )
+	bOreAdd:SetPos( 140, 45)
+	bOreAdd:Dock( RIGHT )
+	bOreAdd:SetSize( 25, 25 )
+	bOreAdd:SetTextColor( Color(0,255,0) )
+	bOreAdd:SetFont("GModNotify")
+	bOreAdd:SetText( "" )
+	bOreAdd:SetIcon( "icon16/add.png" )
+	bOreAdd.DoClick = function( self )
+		sAmount = math.Clamp( sAmount + 1, 0, tItem.amount )
+	end
+
+	local bSell = vgui.Create( "DButton", ore_button )
+	bSell:SetPos( 112, 60)
+	bSell:SetSize( 40, 15 )
+	bSell:SetTextColor( Color(0,200,0) )
+	bSell:SetFont("DebugFixed")
+	bSell:SetText( "SELL" )
+	bSell.DoClick = function( self )
+		net.Start("pm_oreexchange")
+			net.WriteTable({
+				[ iType ] = sAmount,
+			})
+			net.SendToServer()
+	end
+
+	local bDrop = vgui.Create( "DButton", ore_button )
+	bDrop:SetPos( 26, 0)
+	bDrop:SetSize( 40, 15 )
+	bDrop:SetTextColor( Color(0,0,200) )
+	bDrop:SetFont("DebugFixed")
+	bDrop:SetText( "DROP" )
+	bDrop.DoClick = function( self )
 		net.Start("pm_dropore")
-		net.WriteTable({
-			[ iType ] = menu_ores.tQuantities[ menu_ores.iQuantity ],
-		})
-		net.SendToServer()
+			net.WriteTable({
+				[ iType ] = sAmount,
+			})
+			net.SendToServer()
 	end
 
 	return ore_button
@@ -107,7 +130,7 @@ local function createItem( iType, tItem, bShowSell, pParent )
 end
 
 function openMinerMenu( bShowSellButtons )
-	if (CurTime() > menu_next) then
+	if ( CurTime() > menu_next ) then
 		menu_next = CurTime() + 0.5
 
 		if (not menu_ores) then
@@ -129,27 +152,9 @@ function openMinerMenu( bShowSellButtons )
 				surface.DrawRect( 0, 0, wide, tall )
 			end
 
-			menu_ores.iQuantity = 1
-			menu_ores.tQuantities = { [1]=1, [2]=5, [3]=10 }
-
-			local prButton = vgui.Create( "DButton", menu_ores )
-			prButton:SetPos(0, 0)
-			prButton:SetFont("DermaLarge")
-			prButton:SetTextColor( Color(0, 255, 0) )
-			prButton:SetSize(70, 25)
-			prButton:SetText( string.format( "( %ix )",  menu_ores.tQuantities[ menu_ores.iQuantity ] ) )
-			prButton.DoClick = function( self )
-				menu_ores.iQuantity = menu_ores.iQuantity + 1
-				if (menu_ores.iQuantity > 3) then
-					menu_ores.iQuantity = 1
-				end
-
-				prButton:SetText( string.format( "(%ix)",  menu_ores.tQuantities[ menu_ores.iQuantity ] ) )
-			end
-
-
 			local ore_scroller = vgui.Create( "DScrollPanel", menu_ores )
 			ore_scroller:Dock( FILL )
+			ore_scroller:DockMargin( 0, -20, 0, 0 )
 
 			local sbar = ore_scroller:GetVBar()
 			sbar:SetWidth(10)
@@ -168,9 +173,7 @@ function openMinerMenu( bShowSellButtons )
 			end
 
 
-			if ( bShowSellButtons ) then
-				menu_ores:MakePopup()
-			end
+			menu_ores:MakePopup()
 
 			for k, vOre in pairs( PHATMINER_ORE_TYPES ) do
 				local ore_button = createItem(k, vOre, bShowSellButtons, menu_ores)
