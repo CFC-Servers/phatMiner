@@ -7,8 +7,8 @@ SWEP.Category = "!Mining Entities"
 SWEP.Spawnable= true
 SWEP.AdminOnly = false
 SWEP.Base = "weapon_base"
-SWEP.Primary.Damage = 0
-SWEP.Primary.TakeAmmo = -1
+SWEP.Primary.Damage = 3
+SWEP.Primary.TakeAmmo = 0
 SWEP.Primary.ClipSize = 5000
 SWEP.Primary.Ammo = "none"
 SWEP.Primary.DefaultClip = 5000
@@ -16,7 +16,7 @@ SWEP.Primary.Spread = 0
 SWEP.Primary.NumberofShots = 1
 SWEP.Primary.Automatic = true
 SWEP.Primary.Recoil = 0
-SWEP.Primary.Delay = 1.01
+SWEP.Primary.Delay = 0.6
 SWEP.Primary.Force = 500
 SWEP.Secondary.ClipSize = -1
 SWEP.Secondary.DefaultClip = -1
@@ -40,13 +40,4 @@ SWEP.CSMuzzleFlashes = false
 
 function SWEP:Initialize()
 	self:SetWeaponHoldType( self.HoldType )
-end
-
-function SWEP:PrimaryAttack()
-end
-
-function SWEP:SecondaryAttack()
-end
-
-function SWEP:Reload()
 end

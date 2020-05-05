@@ -50,17 +50,17 @@ function SWEP:ShootMagic( magic_type, mana_used )
 
 			local split_required_runes = string.Explode( "+", spell )
 
-			for _, rune_name in pairs( split_required_runwes ) do
+			for _, rune_name in pairs( split_required_runes ) do
 
 				local own_ore_count = owner:GetOre( rune_name )
 
-				if ( own_ore_count > 0 ) thenw
+				if ( own_ore_count > 0 ) then
 
 					owner:SetOre( rune_name, own_ore_count - 1 )
 
 				else
 
-					SafeRemoveEntity( magic_orb )
+					--SafeRemoveEntity( magic_orb )
 
 				end
 

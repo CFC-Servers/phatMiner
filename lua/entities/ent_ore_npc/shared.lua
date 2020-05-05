@@ -10,3 +10,19 @@ ENT.Spawnable = true
 ENT.AutomaticFrameAdvance = false
 
 PrecacheParticleSystem( "vortigaunt_beam" )
+
+
+PHATMINER_MAGIC_COMBOS = {
+  ["rune_air"] = {
+    ["phat_stone"] = 1,
+    ["diamond"] = 1,
+  },
+  ["rune_nature"] = {
+    ["phat_stone"] = 1,
+    ["dirt"] = 1,
+  },
+  ["rune_fire"] = {
+    ["phat_stone"] = 1,
+    ["sulfur"] = 1,
+  },
+}

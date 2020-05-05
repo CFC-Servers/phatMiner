@@ -131,7 +131,7 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(255, 255, 255, 200),
 		["mat"] = "phoenix_storms/wire/pcb_blue",
 		["value"] = 150,
-		["chance"] = 111,
+		["chance"] = -1,
 		["magicFunction"] = function( data )
 
 			if (data.HitEntity) then
@@ -149,7 +149,7 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(255, 255, 255, 200),
 		["mat"] = "phoenix_storms/wire/pcb_red",
 		["value"] = 150,
-		["chance"] = 111,
+		["chance"] = -1,
 		["magicFunction"] = function( data )
 
 			if (data.HitEntity) then
@@ -167,7 +167,7 @@ PHATMINER_ORE_TYPES = {
 		["color"] = Color(255, 255, 255, 200),
 		["mat"] = "phoenix_storms/wire/pcb_green",
 		["value"] = 150,
-		["chance"] = 111,
+		["chance"] = -1,
 		["magicFunction"] = function( data )
 
 			if (data.HitEntity) then

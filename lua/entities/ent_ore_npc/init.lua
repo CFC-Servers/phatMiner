@@ -20,12 +20,12 @@ net.Receive( "pm_dropore", function( len, ply )
 		for oreType, amt in pairs( oreTable ) do
 			if ( PHATMINER_ORE_TYPES[ oreType ] ) then
 
-				if ( amt > 10 ) then
-					ply:ChatPrint( string.format( "You can drop 10 %s at a time.", oreType ) )
-					amt = 10
-				end
-
 				amt = math.abs( amt )
+
+				if ( amt > 5 ) then
+					ply:ChatPrint( string.format( "You can drop 5 %s at a time.", oreType ) )
+					amt = 5
+				end
 
 				if ( ply:GetOre( oreType ) >= amt ) then
 
@@ -53,57 +53,64 @@ net.Receive( "pm_dropore", function( len, ply )
 end )
 
 net.Receive( "pm_oreexchange", function(len, ply)
-	local oreTable = net.ReadTable()
-	local entsNear = ents.FindInSphere( ply:GetPos(), 240 )
-	local foundTrader = false
 
-	for _, ent in pairs( entsNear ) do
-		if (ent:GetClass() == "ent_ore_npc") then
-			foundTrader = true
-		end
-	end
+	if ( ply.lastCommand and CurTime() > ply.lastCommand + 0.5 ) then
+		ply.lastCommand = CurTime()
 
-	if ( foundTrader ) then
-		local salePrice = 0
-		local saleCount = 0
+		local oreTable = net.ReadTable()
+		local entsNear = ents.FindInSphere( ply:GetPos(), 240 )
+		local foundTrader = false
 
-		for oreType, amt in pairs( oreTable ) do
-			if ( PHATMINER_ORE_TYPES[ oreType ] ) then
-
-				amt = math.abs( amt )
-
-				if ( ply:GetOre( oreType ) >= amt ) then
-					saleCount = saleCount + amt
-
-					--take ore
-					ply:SetOre( oreType, ply:GetOre( oreType ) - amt )
-
-					--add money
-					local balance = PHATMINER_ORE_TYPES[ oreType ].value * amt
-					ply:addMoney( balance )
-
-					salePrice = salePrice + balance
-
-					ply:ChatPrint( string.format( "Sold %i %s(s) for $%i.", amt, oreType, balance ) )
-				else
-					ply:ChatPrint( string.format( "You don't have enough %s to complete this offer.", oreType ) )
-				end
+		for _, ent in pairs( entsNear ) do
+			if ( ent:GetClass() == "ent_ore_npc" ) then
+				foundTrader = true
 			end
 		end
-		--ply:ChatPrint( string.format( "Sale complete, sold %i items for a total of $%i.", saleCount, salePrice ) )
-	else
 
-		ply:ChatPrint( "Theres no ore trader nearby." )
+		if ( foundTrader ) then
+			local salePrice = 0
+			local saleCount = 0
+
+			for oreType, amt in pairs( oreTable ) do
+				if ( PHATMINER_ORE_TYPES[ oreType ] ) then
+
+					amt = math.abs( amt )
+
+					if ( ply:GetOre( oreType ) >= amt ) then
+						saleCount = saleCount + amt
+
+						--take ore
+						ply:SetOre( oreType, ply:GetOre( oreType ) - amt )
+
+						--add money
+						local balance = PHATMINER_ORE_TYPES[ oreType ].value * amt
+						ply:addMoney( balance )
+
+						salePrice = salePrice + balance
+
+						ply:ChatPrint( string.format( "Sold %i %s(s) for $%i.", amt, oreType, balance ) )
+					else
+						ply:ChatPrint( string.format( "You don't have enough %s to complete this offer.", oreType ) )
+					end
+				end
+			end
+			--ply:ChatPrint( string.format( "Sale complete, sold %i items for a total of $%i.", saleCount, salePrice ) )
+		else
+
+			ply:ChatPrint( "Theres no ore trader nearby." )
+		end
+	else
+		ply:ChatPrint( "I can't hold all these stones, please slow down." )
 	end
 end )
 
 
 
 local sayings = {
-	Sound("vo/npc/vortigaunt/dedicate.wav"),
-	Sound("vo/npc/vortigaunt/energyempower.wav"),
-	Sound("vo/npc/vortigaunt/fmknowsbest.wav"),
-	Sound("vo/npc/vortigaunt/mystery.wav"),
+	"vo/npc/vortigaunt/dedicate.wav",
+	"vo/npc/vortigaunt/energyempower.wav",
+	"vo/npc/vortigaunt/fmknowsbest.wav",
+	"vo/npc/vortigaunt/mystery.wav",
 }
 
 
@@ -115,7 +122,7 @@ function ENT:Initialize()
 	self:SetModel( models[ math.random( #models ) ] )
 	self:SetColor( Color(255, 255, 255) )
 	self:SetRenderMode( RENDERMODE_TRANSCOLOR )
-	self:SetHealth( 9999 )
+	self:SetHealth( 65535 )
 	self:SetMoveType( MOVETYPE_NONE )
 	self:SetSolid( SOLID_VPHYSICS )
 	if ( SERVER ) then self:PhysicsInit( SOLID_VPHYSICS ) end
@@ -140,12 +147,15 @@ end
 
 function ENT:Use( activator, caller )
 	if IsValid( activator ) then
-		if ( CurTime() > self.LastSaid + 2 ) then
+		if ( CurTime() > self.LastSaid + 1.5 ) then
 			self.LastSaid = CurTime()
 
 			--Open ore menu
 			net.Start( "pm_openmenu" )
 			net.Send( activator )
+
+
+			--sound.Play( table.Random( sayings ), self:GetPos() )
 		else
 			--Asking to trade too fast
 		end
@@ -157,16 +167,26 @@ function ENT:OnTakeDamage( dmginfo )
     if ( activator:IsPlayer() ) then
 		--Smite player with vort beam
 
-		self:SetSequence( "zapattack1" )
-		self:SetAngles( ( activator:GetPos() - self:GetPos()):Angle() )
+		sound.Play( "npc/vort/vort_pain3.wav", self:GetPos() )
 
+		timer.Simple( 5, function()
+			self:ResetSequence( "zapattack1" )
 
-		timer.Simple( 1.4, function()
-			util.ParticleTracerEx( "vortigaunt_beam", self:GetPos() + Vector(0,0,45), activator:GetPos() + Vector(0, 0, 30), true, 0, -1 )
-			self:SetSequence( 2 )
+			local look_angle = ( activator:GetPos() - self:GetPos() ):Angle()
+			look_angle.p = 0
+			look_angle.r = 0
 
-			activator:SetHealth( activator:Health() / 2 )
+			self:SetAngles( look_angle )
+
+			timer.Simple( 1, function()
+				util.ParticleTracerEx( "vortigaunt_beam", self:GetPos() + Vector(0,0,45), activator:GetPos() + Vector(0, 0, 30), true, 0, -1 )
+
+				timer.Simple( 0.4, function()
+					self:ResetSequence( 2 )
+
+					activator:TakeDamage( activator:Health() / 2, self, self )
+				end )
+			end )
 		end )
-
 	end
 end

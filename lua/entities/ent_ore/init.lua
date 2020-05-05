@@ -5,11 +5,11 @@ include( "shared.lua" )
 
 local rock_locations = {
 	["gm_construct"] = {
-		[1] = Vector(0, 0, -90),
-		[2] = Vector(0, 250, -90),
-		[3] = Vector(0, 500, -90),
-		[4] = Vector(0, 750, -90),
-		[5] = Vector(0, 1000, -90),
+		[1] = Vector(0, 0, -85),
+		[2] = Vector(0, 250, -85),
+		[3] = Vector(0, 500, -85),
+		[4] = Vector(0, 750, -85),
+		[5] = Vector(0, 1000, -85),
 	}
 }
 
@@ -21,10 +21,11 @@ local npc_locations = {
 
 
 local rock_models = {
-	[1] = "models/props_wasteland/rockcliff01f.mdl",
-	[2] = "models/props_wasteland/rockcliff01j.mdl",
-	[3] = "models/props_wasteland/rockcliff01k.mdl",
-	[4] = "models/props_wasteland/rockcliff01f.mdl",
+	[1] = {m="models/props_wasteland/rockcliff01f.mdl",v=Vector(0,0,25)},
+	[2] = {m="models/props_wasteland/rockcliff01j.mdl",v=Vector(0,0,25)},
+	[3] = {m="models/props_wasteland/rockcliff01k.mdl",v=Vector(0,0,0)},
+	[4] = {m="models/props_wasteland/rockcliff01f.mdl",v=Vector(0,0,25)},
+	[5] = {m="models/props_wasteland/rockcliff07b.mdl",v=Vector(0,0,55)},
 }
 
 local HitSounds = {
@@ -43,8 +44,9 @@ hook.Add( "InitPostEntity", "OreCreate", function()
 
 				local new_rock = ents.Create( "ent_ore" )
 				new_rock:SetPos( rock )
-				new_rock:SetAngles( Angle(0,0,0) )
+				new_rock:SetAngles( Angle(0,math.random(0, 180),0) )
 				new_rock:Spawn()
+
 			end
 		else
 			print( string.format( "[phatMiner] No rock locations set for %s. (Check phatMiner/lua/entities/ent_ore/init.lua)", map ) )
@@ -60,6 +62,8 @@ hook.Add( "InitPostEntity", "OreCreate", function()
 				new_npc:SetAngles( Angle( 0, 0, 0 ) )
 				new_npc:Spawn()
 				new_npc:SetHealth( 5000 )
+
+				new_npc:DropToFloor()
 			end
 		else
 			print( string.format( "[phatMiner] No npc locations set for %s. (Check phatMiner/lua/entities/ent_ore/init.lua)", map ) )
@@ -71,14 +75,25 @@ end )
 
 
 function ENT:Initialize()
-	self:SetModel( rock_models[ math.random( #rock_models ) ] )
+
+	local rock_preset = rock_models[ math.random( #rock_models ) ]
+
+	self:SetModel( rock_preset.m )
 	self:SetRenderMode( RENDERMODE_TRANSCOLOR )
 	self:SetHealth( 100 )
 	self:SetMoveType( MOVETYPE_NONE )
 	self:SetSolid( SOLID_VPHYSICS )
-	self:SetModelScale(0)
-	self:SetModelScale(1, 2)
+	--self:SetModelScale(0)
+	--self:SetModelScale(1, 2)
 	self:SetGravity( 0 )
+
+	self:SetPos( self:GetPos() + rock_preset.v )
+
+	self:DropToFloor()
+
+	--[[timer.Create( "rock_emerge_"..self:EntIndex(), 0.01, rock_preset.v.z, function()
+		self:SetPos( self:GetPos() + Vector(0, 0, 1 ) )
+	end )]]
 
 	if ( SERVER ) then self:PhysicsInit( SOLID_VPHYSICS ) end
 	local phys = self:GetPhysicsObject()
